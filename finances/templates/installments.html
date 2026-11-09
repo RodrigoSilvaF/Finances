@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "_macros.html" import month_nav %}
+{% block title %}Parcelas{% endblock %}
+{% block content %}
+<div class="head">
+  <h1>Parcelas</h1>
+  {{ month_nav(nav, 'main.installments') }}
+</div>
+<p class="muted">Mês = mês em que a fatura é paga. Vence neste mês: <strong>{{ total | brl }}</strong>
+(sua parte {{ mine | brl }}). Ainda falta pagar, sua parte: <strong>{{ owed | brl }}</strong>.</p>
+<p><a class="button" href="{{ url_for('main.installment_form') }}">+ Nova parcela</a></p>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Compra</th><th>Dono</th><th>Parcela</th><th>Valor</th><th>Restam</th><th>Última</th><th>50/30/20</th></tr></thead>
+  <tbody>
+  {% for r in active %}
+    <tr class="{{ 'dim' if not r.due }}">
+      <td><a href="{{ url_for('main.installment_form', id=r.i.id) }}">{{ r.i.name }}</a>
+        <div class="small muted">{{ r.i.card }}{% if r.i.description %} · {{ r.i.description }}{% endif %}</div></td>
+      <td><span class="pill who-{{ r.i.owner | lower }}">{{ r.i.owner }}</span></td>
+      <td>{% if r.number < 1 %}começa {{ r.i.first_month | mes }}{% else %}{{ r.number }} de {{ r.i.total }}{% endif %}</td>
+      <td class="num">{{ r.i.amount | brl }}</td>
+      <td class="num">{{ r.remaining }}</td>
+      <td>{{ r.last | mes }}</td>
+      <td>{{ r.i.group }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="7" class="muted">Nenhuma parcela em aberto.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% if finished %}
+<details><summary>{{ finished | length }} parcela{{ 's' if finished | length != 1 }} já terminada{{ 's' if finished | length != 1 }}</summary>
+  <ul class="list">{% for r in finished %}<li><a href="{{ url_for('main.installment_form', id=r.i.id) }}">{{ r.i.name }}</a> — terminou {{ r.last | mes }}</li>{% endfor %}</ul>
+</details>
+{% endif %}
+{% endblock %}

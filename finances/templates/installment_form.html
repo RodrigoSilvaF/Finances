@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% from "_macros.html" import select %}
+{% block title %}{{ 'Editar parcela' if item else 'Nova parcela' }}{% endblock %}
+{% block content %}
+<div class="narrow">
+  <h1>{{ 'Editar parcela' if item else 'Nova parcela' }}</h1>
+  <form method="post" class="form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="name">Compra</label>
+    <input name="name" id="name" maxlength="80" placeholder="Carro — manutenção" value="{{ form.get('name', '') }}" required>
+    <label for="description">O que é (opcional)</label>
+    <input name="description" id="description" maxlength="200" value="{{ form.get('description', '') }}">
+    <div class="two">
+      <div><label for="card">Cartão</label>
+        <input name="card" id="card" maxlength="30" list="cards" value="{{ form.get('card', '') }}">
+        <datalist id="cards"><option>XP</option><option>Nubank</option></datalist></div>
+      <div><label for="amount">Valor da parcela (R$)</label>
+        <input name="amount" id="amount" inputmode="decimal" value="{{ form.get('amount', '') }}" required></div>
+    </div>
+    <div class="three">
+      <div><label for="number">Parcela nº</label>
+        <input type="number" min="1" name="number" id="number" value="{{ form.get('number', 1) }}" required></div>
+      <div><label for="total">De</label>
+        <input type="number" min="1" name="total" id="total" value="{{ form.get('total', '') }}" required></div>
+      <div><label for="month">Vence na fatura de</label>
+        <input type="month" name="month" id="month" value="{{ form.get('month', '') }}" required></div>
+    </div>
+    <p class="hint">Ex.: "Parcela 1 de 4, vence na fatura de dez/2026" para uma compra feita depois do fechamento de novembro.</p>
+    <div class="three">
+      <div><label for="owner">De quem é</label>{{ select('owner', owners, form.get('owner')) }}</div>
+      <div><label for="paid_by">Quem paga</label>{{ select('paid_by', people, form.get('paid_by')) }}</div>
+      <div><label for="group">50/30/20</label>{{ select('group', groups, form.get('group')) }}</div>
+    </div>
+    <div class="actions"><button class="primary">Salvar</button></div>
+  </form>
+  {% if item %}
+  <form method="post" action="{{ url_for('main.installment_delete', id=item.id) }}" onsubmit="return confirm('Apagar esta parcela?')">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="danger">Apagar parcela</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

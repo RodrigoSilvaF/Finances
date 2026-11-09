@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Entrar{% endblock %}
+{% block content %}
+<div class="narrow">
+  <h1>Finanças</h1>
+  {% if no_users %}
+    <div class="flash error">Nenhum usuário criado ainda. Defina as variáveis de ambiente
+      <code>RODRIGO_PASSWORD</code> e <code>MAYANE_PASSWORD</code> e reinicie o app.</div>
+  {% endif %}
+  <form method="post" class="form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="username">Usuário</label>
+    <select name="username" id="username"><option value="rodrigo">Rodrigo</option><option value="mayane">Mayane</option></select>
+    <label for="password">Senha</label>
+    <input type="password" name="password" id="password" autocomplete="current-password" required autofocus>
+    <button class="primary">Entrar</button>
+  </form>
+</div>
+{% endblock %}

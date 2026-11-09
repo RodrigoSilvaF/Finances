@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Projeção{% endblock %}
+{% block content %}
+<h1>Quanto o Rodrigo pode ter até {{ p.end.year }}</h1>
+<p class="muted">De {{ p.start | mes }} a {{ p.end | mes }}, com salário líquido de {{ p.net_salary | brl }}, contas fixas e parcelas cadastradas,
+e dia a dia igual aos limites ({{ p.daily_plan | brl }}/mês, sua parte). Ajuste inflação, rendimento, reajuste e cenários em Config.</p>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Saldo guardado em</th>
+    {% for n, extra in p.scenarios.items() %}<th>{{ n }}{% if extra %}<div class="small">+{{ extra | brl }}/mês</div>{% endif %}</th>{% endfor %}</tr></thead>
+  <tbody>
+  {% for row in p.table %}
+    <tr class="{{ 'strong' if loop.last }}">
+      <td>{{ row.month | mes }}</td>
+      {% for n in p.scenarios %}<td class="num {{ 'neg' if row['values'][n] < 0 }}">{{ row['values'][n] | brl }}
+        <div class="small muted">guardou {{ row.contrib[n] | brl }} no mês</div></td>{% endfor %}
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+<p class="hint">Estimativa para planejamento, não recomendação de investimento. Os cenários Realista e Conservador
+gastam um valor fixo a mais por mês que os limites (imprevistos, novas parcelas, presentes).</p>
+{% endblock %}

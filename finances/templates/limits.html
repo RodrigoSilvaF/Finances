@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Limites{% endblock %}
+{% block content %}
+<h1>Limites mensais por categoria</h1>
+<p class="muted">Casal = limite do gasto total do casal, antes de dividir. Rodrigo / Mayane = gastos só de cada um. 0 = sem verba.</p>
+<form method="post" class="form wide">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="tablewrap">
+  <table class="edit">
+    <thead><tr><th>Categoria</th><th>50/30/20</th><th class="who-casal">Casal</th><th class="who-rodrigo">Rodrigo</th><th class="who-mayane">Mayane</th></tr></thead>
+    <tbody>
+    {% for c in cats %}
+      <tr>
+        <td><strong>{{ c.name }}</strong><div class="small muted">{{ c.description }}</div></td>
+        <td><select name="group_{{ c.id }}">{% for g in groups %}<option {{ 'selected' if g == c.group }}>{{ g }}</option>{% endfor %}</select></td>
+        <td><input name="casal_{{ c.id }}" inputmode="decimal" value="{{ '%.2f' | format(c.limit_casal) }}"></td>
+        <td><input name="rodrigo_{{ c.id }}" inputmode="decimal" value="{{ '%.2f' | format(c.limit_rodrigo) }}"></td>
+        <td><input name="mayane_{{ c.id }}" inputmode="decimal" value="{{ '%.2f' | format(c.limit_mayane) }}"></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot><tr><td>Total</td><td></td><td class="num">{{ tot.casal | brl }}</td><td class="num">{{ tot.rodrigo | brl }}</td><td class="num">{{ tot.mayane | brl }}</td></tr></tfoot>
+  </table>
+  </div>
+  <p class="muted">Limite total do Rodrigo: <strong>{{ (tot.rodrigo + tot.casal * split) | brl }}</strong> ·
+     da Mayane: <strong>{{ (tot.mayane + tot.casal * (1 - split)) | brl }}</strong></p>
+  <fieldset>
+    <legend>Nova categoria (opcional)</legend>
+    <div class="three">
+      <div><label for="new_name">Nome</label><input name="new_name" id="new_name" maxlength="60"></div>
+      <div><label for="new_description">O que entra</label><input name="new_description" id="new_description" maxlength="200"></div>
+      <div><label for="new_group">50/30/20</label><select name="new_group" id="new_group">{% for g in groups %}<option>{{ g }}</option>{% endfor %}</select></div>
+    </div>
+  </fieldset>
+  <div class="actions"><button class="primary">Salvar limites</button></div>
+</form>
+{% endblock %}

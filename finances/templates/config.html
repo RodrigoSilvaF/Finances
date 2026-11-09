@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Configurações{% endblock %}
+{% block content %}
+<div class="narrow">
+  <h1>Configurações</h1>
+  <p class="muted">Salário líquido do Rodrigo hoje: <strong>{{ net | brl }}</strong> · renda da Mayane: <strong>{{ mayane | brl }}</strong></p>
+  <form method="post" class="form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% for s in items %}
+      <label for="{{ s.key }}">{{ s.label }}</label>
+      <input name="{{ s.key }}" id="{{ s.key }}" inputmode="decimal" value="{{ s.value }}">
+    {% endfor %}
+    <div class="actions"><button class="primary">Salvar</button></div>
+  </form>
+  <p class="hint">Percentuais em fração: 0,751 = 75,1%. O salário líquido é US$ × dólar × (1 − deságio) × (1 − impostos) − reserva fixa.</p>
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% from "_macros.html" import select %}
+{% block title %}{{ 'Editar gasto' if item else 'Lançar gasto' }}{% endblock %}
+{% block content %}
+<div class="narrow">
+  <h1>{{ 'Editar gasto' if item else 'Lançar gasto' }}</h1>
+  <form method="post" class="form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="amount">Valor (R$)</label>
+    <input name="amount" id="amount" inputmode="decimal" placeholder="85,90" value="{{ form.get('amount', '') }}" required autofocus>
+
+    <label for="description">Descrição</label>
+    <input name="description" id="description" maxlength="120" placeholder="Komprão, iFood, Uber..." value="{{ form.get('description', '') }}" required>
+
+    <label for="category_id">Categoria</label>
+    <select name="category_id" id="category_id" required>
+      <option value="">Escolha...</option>
+      {% for c in cats %}
+        <option value="{{ c.id }}" {{ 'selected' if form.get('category_id') == c.id | string }}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+
+    <label>De quem é</label>
+    <div class="seg">
+      {% for o in owners %}
+        <label class="who-{{ o | lower }}"><input type="radio" name="owner" value="{{ o }}" {{ 'checked' if form.get('owner') == o }} required> {{ o }}</label>
+      {% endfor %}
+    </div>
+
+    <label>Quem pagou</label>
+    <div class="seg">
+      {% for p in people %}
+        <label><input type="radio" name="paid_by" value="{{ p }}" {{ 'checked' if form.get('paid_by') == p }} required> {{ p }}</label>
+      {% endfor %}
+    </div>
+
+    <div class="two">
+      <div>
+        <label for="date">Data</label>
+        <input type="date" name="date" id="date" value="{{ form.get('date', '') }}" required>
+      </div>
+      <div>
+        <label for="method">Forma de pagamento</label>
+        <select name="method" id="method">
+          <option value="">–</option>
+          {% for m in methods %}<option {{ 'selected' if form.get('method') == m }}>{{ m }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <label for="notes">Observação (opcional)</label>
+    <input name="notes" id="notes" maxlength="200" value="{{ form.get('notes', '') }}">
+
+    <div class="actions">
+      <button class="primary">Salvar</button>
+      {% if not item %}<button class="secondary" name="again" value="1">Salvar e lançar outro</button>{% endif %}
+    </div>
+  </form>
+  {% if item %}
+  <form method="post" action="{{ url_for('main.expense_delete', id=item.id) }}" onsubmit="return confirm('Apagar este gasto?')">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="danger">Apagar gasto</button>
+  </form>
+  {% endif %}
+  <p class="hint">Compra parcelada? Cadastre em <a href="{{ url_for('main.installment_form') }}">Parcelas</a> em vez de lançar aqui.</p>
+</div>
+{% endblock %}

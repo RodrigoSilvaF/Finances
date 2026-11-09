@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Finanças{% endblock %} · Finanças</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% if current_user.is_authenticated %}
+<header class="top">
+  <a class="brand" href="{{ url_for('main.dashboard') }}">Finanças</a>
+  <nav>
+    {% set links = [('main.dashboard','Painel'),('main.expenses','Gastos'),('main.fifty','50/30/20'),
+                    ('main.installments','Parcelas'),('main.fixed','Fixas'),('main.limits','Limites'),
+                    ('main.projection','Projeção'),('main.config','Config')] %}
+    {% for ep, label in links %}
+      <a href="{{ url_for(ep) }}" class="{{ 'on' if request.endpoint == ep }}">{{ label }}</a>
+    {% endfor %}
+  </nav>
+  <form method="post" action="{{ url_for('main.logout') }}" class="logout">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="link">Sair ({{ current_user.person }})</button>
+  </form>
+</header>
+<a class="fab" href="{{ url_for('main.expense_form') }}" aria-label="Lançar gasto">+ Lançar gasto</a>
+{% endif %}
+<main>
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in msgs %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "_macros.html" import month_nav %}
+{% block title %}Gastos{% endblock %}
+{% block content %}
+<div class="head">
+  <h1>Gastos</h1>
+  {{ month_nav(nav, 'main.expenses', dono=owner) }}
+</div>
+<div class="tabs">
+  <a class="tab {{ 'on' if not owner }}" href="{{ url_for('main.expenses', m=nav.current.strftime('%Y-%m')) }}">Todos</a>
+  {% for o in ['Casal', 'Rodrigo', 'Mayane'] %}
+    <a class="tab {{ 'on' if owner == o }}" href="{{ url_for('main.expenses', m=nav.current.strftime('%Y-%m'), dono=o) }}">{{ o }}</a>
+  {% endfor %}
+</div>
+<p class="total">{{ items | length }} gasto{{ 's' if items | length != 1 }} · {{ total | brl }}</p>
+<ul class="list">
+  {% for e in items %}
+  <li>
+    <a href="{{ url_for('main.expense_form', id=e.id) }}">
+      <div class="catrow">
+        <span class="name">{{ e.description }}</span>
+        <strong>{{ e.amount | brl }}</strong>
+      </div>
+      <div class="catrow small muted">
+        <span>{{ e.date.strftime('%d/%m') }} · {{ e.category.name }}</span>
+        <span><span class="pill who-{{ e.owner | lower }}">{{ e.owner }}</span> pago por {{ e.paid_by }}</span>
+      </div>
+    </a>
+  </li>
+  {% else %}
+  <li class="muted">Nenhum gasto neste mês.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,29 @@
+# Blueprint do Render: cria o app e o banco juntos (New > Blueprint).
+services:
+  - type: web
+    name: financas
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --preload --workers 2 --bind 0.0.0.0:$PORT "finances:create_app()"
+    healthCheckPath: /login
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: DATABASE_URL
+        fromDatabase:
+          name: financas-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      # senhas de login: o Render pede os valores na criação (não ficam no repositório)
+      - key: RODRIGO_PASSWORD
+        sync: false
+      - key: MAYANE_PASSWORD
+        sync: false
+
+databases:
+  - name: financas-db
+    plan: free
+    databaseName: financas
+    user: financas

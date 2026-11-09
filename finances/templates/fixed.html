@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "_macros.html" import month_nav %}
+{% block title %}Contas fixas{% endblock %}
+{% block content %}
+<div class="head">
+  <h1>Contas fixas</h1>
+  {{ month_nav(nav, 'main.fixed') }}
+</div>
+<p class="muted">Total no mês: <strong>{{ total | brl }}</strong> · parte do Rodrigo {{ mine | brl }} · parte da Mayane {{ hers | brl }}</p>
+<p><a class="button" href="{{ url_for('main.fixed_form') }}">+ Nova conta fixa</a></p>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Conta</th><th>Dono</th><th>Valor</th><th>Rodrigo</th><th>Mayane</th><th>Quem paga</th><th>Até</th><th>50/30/20</th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+    <tr class="{{ 'dim' if not r.active }}">
+      <td><a href="{{ url_for('main.fixed_form', id=r.f.id) }}">{{ r.f.name }}</a>
+        {% if r.f.description %}<div class="small muted">{{ r.f.description }}</div>{% endif %}</td>
+      <td><span class="pill who-{{ r.f.owner | lower }}">{{ r.f.owner }}</span></td>
+      <td class="num">{{ r.f.amount | brl }}</td>
+      <td class="num">{{ r.mine | brl }}</td>
+      <td class="num">{{ r.hers | brl }}</td>
+      <td>{{ r.f.paid_by }}</td>
+      <td>{{ r.f.end_month | mes if r.f.end_month else '–' }}</td>
+      <td>{{ r.f.group }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="8" class="muted">Nenhuma conta fixa cadastrada.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+<p class="hint">Contas do Casal pagas pelo Rodrigo entram no acerto do mês (a Mayane devolve a parte dela).</p>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "_macros.html" import month_nav %}
+{% block title %}50/30/20{% endblock %}
+{% block content %}
+<div class="head">
+  <h1>50/30/20 — {{ person }}</h1>
+  {{ month_nav(nav, 'main.fifty', p=person) }}
+</div>
+<div class="tabs">
+  {% for p in ['Rodrigo', 'Mayane'] %}
+    <a class="tab {{ 'on' if p == person }}" href="{{ url_for('main.fifty', m=nav.current.strftime('%Y-%m'), p=p) }}">{{ p }}</a>
+  {% endfor %}
+</div>
+<p class="muted">Renda do mês: <strong>{{ r.income | brl }}</strong>. Conta a parte de {{ person }} nas contas fixas do mês, nas parcelas da fatura do mês seguinte
+e nos gastos lançados no mês.</p>
+
+<section class="rule">
+  {% for l in r.lines %}
+  <article class="card rule-{{ loop.index }} {{ 'ok' if l.ok else 'over' }}">
+    <h2>{{ l.group }} <span class="muted">meta {{ l.target_pct | pct }}</span></h2>
+    <p class="big {{ 'neg' if l.value < 0 }}">{{ l.value | brl }} <small>({{ l.pct | pct }})</small></p>
+    <div class="bar"><span class="{{ 'good' if l.ok else 'bad' }}" style="width: {{ ([l.pct / l.target_pct if l.target_pct else 0, 1] | min * 100) if l.pct > 0 else 0 }}%"></span></div>
+    <p class="muted">Meta: {{ l.target | brl }} ·
+      {% if l.group == 'Poupança' %}
+        {{ 'guardando acima da meta' if l.ok else 'faltam ' ~ ((l.target - l.value) | brl) }}
+      {% else %}
+        {{ 'sobram ' ~ ((l.target - l.value) | brl) if l.ok else 'passou ' ~ ((l.value - l.target) | brl) }}
+      {% endif %}
+    </p>
+    {% if l.parts %}
+    <dl>{% for k, v in l.parts.items() %}<dt>{{ k }}</dt><dd>{{ v | brl }}</dd>{% endfor %}</dl>
+    {% endif %}
+  </article>
+  {% endfor %}
+</section>
+<p class="hint">Necessidade = o que é preciso para viver e trabalhar (casa, carro, mercado, saúde). Desejo = estilo de vida
+(comer fora, assinaturas, compras). Poupança = o que sobra. A classificação de cada categoria fica em Limites; de cada conta e parcela, nas respectivas abas.
+No começo do mês a poupança aparece alta porque os gastos ainda não foram lançados.</p>
+{% endblock %}

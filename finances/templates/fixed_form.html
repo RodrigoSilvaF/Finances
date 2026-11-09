@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "_macros.html" import select %}
+{% block title %}{{ 'Editar conta' if item else 'Nova conta fixa' }}{% endblock %}
+{% block content %}
+<div class="narrow">
+  <h1>{{ 'Editar conta' if item else 'Nova conta fixa' }}</h1>
+  <form method="post" class="form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="name">Conta</label>
+    <input name="name" id="name" maxlength="60" placeholder="Aluguel" value="{{ form.get('name', '') }}" required>
+    <label for="description">O que é (opcional)</label>
+    <input name="description" id="description" maxlength="200" value="{{ form.get('description', '') }}">
+    <label for="amount">Valor mensal total (R$)</label>
+    <input name="amount" id="amount" inputmode="decimal" value="{{ form.get('amount', '') }}" required>
+    <div class="three">
+      <div><label for="owner">De quem é</label>{{ select('owner', owners, form.get('owner')) }}</div>
+      <div><label for="paid_by">Quem paga</label>{{ select('paid_by', people, form.get('paid_by')) }}</div>
+      <div><label for="group">50/30/20</label>{{ select('group', groups, form.get('group')) }}</div>
+    </div>
+    <label for="end_month">Último mês (opcional, ex.: financiamento)</label>
+    <input type="month" name="end_month" id="end_month" value="{{ form.get('end_month', '') }}">
+    <label class="check"><input type="checkbox" name="inflates" value="1" {{ 'checked' if form.get('inflates') }}>
+      Reajusta com a inflação na projeção (aluguel sim; financiamento não)</label>
+    <div class="actions"><button class="primary">Salvar</button></div>
+  </form>
+  {% if item %}
+  <form method="post" action="{{ url_for('main.fixed_delete', id=item.id) }}" onsubmit="return confirm('Apagar esta conta?')">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="danger">Apagar conta</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

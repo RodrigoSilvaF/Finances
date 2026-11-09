@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% from "_macros.html" import month_nav, used_badge, bar, level %}
+{% block title %}Painel{% endblock %}
+{% block content %}
+<div class="head">
+  <h1>Painel do mês</h1>
+  {{ month_nav(nav, 'main.dashboard') }}
+</div>
+<p class="muted">
+  {% if d.days_left %}Faltam <strong>{{ d.days_left }}</strong> dias no mês.{% else %}Mês encerrado.{% endif %}
+  {{ d.count }} gasto{{ 's' if d.count != 1 }} lançado{{ 's' if d.count != 1 }}.
+</p>
+
+<section class="cards">
+  {% for who, c in d.cards.items() %}
+  <article class="card who-{{ who | lower }}">
+    <h2>{{ who }}</h2>
+    <p class="big {{ 'neg' if c.left < 0 }}">{{ c.left | brl }}</p>
+    <p class="muted">ainda pode gastar</p>
+    {{ bar(c.used) }}
+    <dl>
+      <dt>Já gastou</dt><dd>{{ c.spent | brl }}</dd>
+      <dt>Limite</dt><dd>{{ c.limit | brl }}</dd>
+      <dt>Por dia</dt><dd>{{ c.per_day | brl if c.per_day is not none else '–' }}</dd>
+    </dl>
+    <p class="hint">{{ c.what }}</p>
+  </article>
+  {% endfor %}
+</section>
+
+<section class="settle {{ 'zero' if d.settle.total | abs < 0.01 }}">
+  <h2>Acerto do mês</h2>
+  {% if d.settle.total > 0.005 %}
+    <p class="big">Mayane transfere {{ d.settle.total | brl }} para o Rodrigo</p>
+  {% elif d.settle.total < -0.005 %}
+    <p class="big">Rodrigo transfere {{ (-d.settle.total) | brl }} para a Mayane</p>
+  {% else %}
+    <p class="big">Tudo certo, ninguém deve nada</p>
+  {% endif %}
+  <ul class="parts">
+    {% for k, v in d.settle.parts.items() %}<li>{{ k }}: <strong>{{ v | brl }}</strong></li>{% endfor %}
+  </ul>
+  <p class="hint">Considera quem pagou cada item e a divisão {{ ('%.1f' | format(d.split * 100)) | replace('.', ',') }}% / {{ ('%.1f' | format((1 - d.split) * 100)) | replace('.', ',') }}%.</p>
+</section>
+
+<h2>Por categoria</h2>
+<div class="tabs" role="tablist">
+  <button class="tab on" data-who="Casal">Casal</button>
+  <button class="tab" data-who="Rodrigo">Rodrigo</button>
+  <button class="tab" data-who="Mayane">Mayane</button>
+</div>
+{% for who in ['Casal', 'Rodrigo', 'Mayane'] %}
+<div class="catlist" data-who="{{ who }}" {{ 'hidden' if who != 'Casal' }}>
+  {% for r in d.rows if r[who].limit or r[who].spent %}
+    {% set x = r[who] %}
+    <div class="cat">
+      <div class="catrow">
+        <span class="name">{{ r.category.name }}</span>
+        {{ used_badge(x.used) }}
+      </div>
+      {{ bar(x.used) }}
+      <div class="catrow small muted">
+        <span>{{ x.spent | brl }} de {{ x.limit | brl }}</span>
+        <span class="{{ 'neg' if x.left < 0 }}">resta {{ x.left | brl }}</span>
+      </div>
+    </div>
+  {% else %}
+    <p class="muted">Nenhum limite nem gasto para {{ who }} neste mês.</p>
+  {% endfor %}
+  <p class="total">Total {{ who }}: {{ d.totals[who].spent | brl }} de {{ d.totals[who].limit | brl }}
+    {% if who != 'Casal' %}<span class="muted">(só {{ 'dele' if who == 'Rodrigo' else 'dela' }}; a parte do casal está no cartão acima)</span>{% endif %}</p>
+</div>
+{% endfor %}
+<p class="hint">Verde até 80% do limite · amarelo de 80% a 100% · vermelho estourou ou gastou sem verba.
+Contas fixas e parcelas ficam nas abas Fixas e Parcelas; este painel é o dia a dia.</p>
+
+<script>
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === t));
+  document.querySelectorAll('.catlist').forEach(l => l.hidden = l.dataset.who !== t.dataset.who);
+}));
+</script>
+{% endblock %}

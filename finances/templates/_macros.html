@@ -1,0 +1,33 @@
+{% macro month_nav(nav, endpoint) -%}
+<div class="monthnav">
+  <a href="{{ url_for(endpoint, m=nav.prev.strftime('%Y-%m'), **kwargs) }}" aria-label="Mês anterior">‹</a>
+  <strong>{{ nav.current | mes }}</strong>
+  <a href="{{ url_for(endpoint, m=nav.next.strftime('%Y-%m'), **kwargs) }}" aria-label="Próximo mês">›</a>
+</div>
+{%- endmacro %}
+
+{# used: fração do limite usada, None (sem limite e sem gasto) ou 'nolimit' (gastou sem verba) #}
+{% macro level(used) -%}
+  {%- if used is none -%}muted
+  {%- elif used == 'nolimit' or used > 1 -%}bad
+  {%- elif used == 0 -%}muted
+  {%- elif used >= 0.8 -%}warn
+  {%- else -%}good{%- endif -%}
+{%- endmacro %}
+
+{% macro used_badge(used) -%}
+  {% if used is none %}<span class="badge muted">–</span>
+  {% elif used == 'nolimit' %}<span class="badge bad">sem verba</span>
+  {% else %}<span class="badge {{ level(used) }}">{{ used | pct }}</span>{% endif %}
+{%- endmacro %}
+
+{% macro bar(used) -%}
+  {% set w = 0 if used is none else (100 if used == 'nolimit' else ([used, 1] | min) * 100) %}
+  <div class="bar"><span class="{{ level(used) }}" style="width: {{ w }}%"></span></div>
+{%- endmacro %}
+
+{% macro select(name, options, selected) -%}
+<select name="{{ name }}" id="{{ name }}" required>
+  {% for o in options %}<option value="{{ o }}" {{ 'selected' if o == selected }}>{{ o }}</option>{% endfor %}
+</select>
+{%- endmacro %}
